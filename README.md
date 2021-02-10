@@ -1,2 +1,7 @@
 # VanityNumberGenerator
-An Amazon Connect contact flow to generate vanity numbers for those who call in
+
+## Overview
+
+This app allows the users to call in and have several vanity numbers generated for their phone number using Amazon Connect and AWS Lambda.  
+
+The generated numbers are stored in DynamoDB and the most recent numbers can be viewed on a static website hosted in S3.
