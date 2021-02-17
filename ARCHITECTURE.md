@@ -1,4 +1,0 @@
-![architecture](assets/architecture.png)
-
-
-
