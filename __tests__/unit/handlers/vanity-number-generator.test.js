@@ -1,37 +1,33 @@
-// const AWS = require('aws-sdk-mock');
+const AWS = require('aws-sdk-mock');
 
-// describe('Test s3JsonLoggerHandler', () => {
-//   it('should read and log S3 objects', async () => {
-//     const objectBody = '{"Test": "PASS"}';
-//     const getObjectResp = {
-//       Body: objectBody
-//     };
+process.env.TABLE_NAME = 'VanityNumbers';
 
-//     AWS.mock('S3', 'getObject', function(params, callback) {
-//       callback(null, getObjectResp);
-//     });
+const event = {
+    "Details": {
+        "ContactData": {
+            "CustomerEndpoint": {
+                "Address": "+1234567890",
+                "Type": "TELEPHONE_NUMBER"
+            }
+        }
+    }
+} 
 
-//     const event = {
-//       Records: [
-//         {
-//           s3: {
-//             bucket: {
-//               name: "test-bucket"
-//             },
-//             object: {
-//               key: "test-key"
-//             }
-//           }
-//         }
-//       ]
-//     }
+describe('Test VanityNumberGeneratorFunction', () => {
+  it('should generate 5 numbers', async () => {
 
-//     console.info = jest.fn();
-//     let handler = require('../../../src/handlers/s3-json-logger.js');
+    let numbers;
+    AWS.mock('DynamoDB.DocumentClient', 'batchWrite', function(params, callback) {
+      numbers = params.RequestItems.VanityNumbers;
+      callback(null, {});
+    });
 
-//     await handler.s3JsonLoggerHandler(event, null);
+    let handler = require('../../../src/handlers/vanity-number-generator.js');
 
-//     expect(console.info).toHaveBeenCalledWith(objectBody);
-//     AWS.restore('S3');
-//   });
-// });
+    let res = await handler.generateVanityNumbers(event, null);
+
+    console.log(res)
+    expect(numbers.length).toBe(5);
+    AWS.restore('DynamoDB.DocumentClient');
+  });
+});
