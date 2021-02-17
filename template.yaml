@@ -3,22 +3,37 @@ Transform: AWS::Serverless-2016-10-31
 Description: >
   vanity-name-generator
 
-# Parameters:
-#   AppBucketName:
-#     Type: String
-#     Description: "REQUIRED: Unique S3 bucket name to use for the app."
-
 Resources:
+  VanityNumbers:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: VanityNumbers
+      KeySchema:
+        - KeyType: HASH
+          AttributeName: id
+        - KeyType: RANGE
+          AttributeName: date
+      AttributeDefinitions:
+        - AttributeName: date
+          AttributeType: S
+        - AttributeName: id
+          AttributeType: S
+      BillingMode: PROVISIONED
+      ProvisionedThroughput:
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1
+
   VanityNumberGeneratorFunction:
     Type: AWS::Serverless::Function
     Properties:
       Handler: src/handlers/vanity-number-generator.generateVanityNumbers
       Runtime: nodejs12.x
-      MemorySize: 128
-      Timeout: 60
+      AutoPublishAlias: live
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref VanityNumbers
+      Policies: 
+        - DynamoDBWritePolicy:
+            TableName: !Ref VanityNumbers
       
-
-  # AppBucket:
-  #   Type: AWS::S3::Bucket
-  #   Properties:
-  #     BucketName: !Ref AppBucketName
+            
